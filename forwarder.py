@@ -1,7 +1,7 @@
 from io import BytesIO
 from datetime import datetime
 from report_generator import generate_html_report
-
+from telethon.tl.types import DocumentAttributeFilename
 
 async def forward_messages(client, messages, destination):
     if not messages:
@@ -10,20 +10,24 @@ async def forward_messages(client, messages, destination):
     resolved = "me" if destination in ["saved_messages", "me"] else destination
 
     try:
-        # Generate HTML report
+        # ✅ Generate HTML report
         html_content = generate_html_report(messages)
         html_file = BytesIO(html_content.encode("utf-8"))
         html_filename = f"job_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
 
-        # Send HTML file
+        # ✅ Send HTML report
         await client.send_file(
             resolved,
             html_file,
             caption=f"📄 Job Report - {len(messages)} jobs found! Open in browser for best view.",
-            file_name=html_filename
+            file_name=html_filename,
+            force_document=True,
+            attributes=[
+                DocumentAttributeFilename(file_name=html_filename)
+            ]
         )
 
-        # Also send a quick summary message
+        # ✅ Send summary message
         summary = generate_summary_message(messages)
         await client.send_message(resolved, summary)
 
@@ -31,7 +35,7 @@ async def forward_messages(client, messages, destination):
 
     except Exception as e:
         print(f"❌ Failed to send HTML report to {resolved}: {e}")
-        # Fallback to text format
+        # 🔁 Only send fallback if HTML failed
         await send_text_fallback(client, messages, resolved)
 
 
@@ -72,7 +76,7 @@ def generate_summary_message(messages):
     from collections import Counter
     top_keywords = Counter(all_keywords).most_common(3)
 
-    summary = f"""🎯 **Job Search Results**
+    summary = f"""```🎯 **Job Search Results**
 
 📊 **Summary:**
 • Total jobs found: {len(messages)}
@@ -90,6 +94,6 @@ def generate_summary_message(messages):
         for keyword, count in top_keywords:
             summary += f"• {keyword}: {count} times\n"
 
-    summary += f"\n💡 Open the HTML file above for detailed view with clickable links!"
+    summary += f"\n💡 Open the HTML file above for detailed view with clickable links!```"
 
     return summary

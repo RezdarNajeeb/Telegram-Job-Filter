@@ -21,7 +21,7 @@ def normalize_keywords(keywords):
             pattern = re.compile(rf'(?i)(?<!\w){re.escape(kw.lower())}(?!\w)')
         elif has_special_chars:
             # Escape all parts and allow optional whitespace around symbols
-            flexible = re.sub(r'([./+\-#])', r'\s*\1\s*', re.escape(kw))
+            flexible = re.sub(r'([./+\-#])', r'\\s*\1\\s*', re.escape(kw))
             pattern = re.compile(rf'(?i)(?<!\w){flexible}(?!\w)')
         else:
             pattern = re.compile(re.escape(kw), re.IGNORECASE)
