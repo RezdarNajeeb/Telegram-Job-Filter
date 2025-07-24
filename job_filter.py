@@ -3,54 +3,38 @@ from typing import List, Dict, Any
 
 
 def normalize_keywords(keywords):
-    """Prepare keywords with different matching strategies"""
+    """Normalize and precompile regex patterns for smart matching"""
     normalized = []
     for kw in keywords:
         kw = kw.strip()
         if not kw:
             continue
 
-        # Determine matching strategy based on keyword characteristics
-        keyword_info = {
+        is_acronym = kw.isupper() and len(kw) <= 5
+        is_short = len(kw) <= 3
+        has_special_chars = bool(re.search(r'[./\-+#]', kw))
+
+        # Build regex pattern based on keyword type
+        if is_acronym:
+            pattern = re.compile(rf'(?<!\w){re.escape(kw)}(?!\w)')
+        elif is_short:
+            pattern = re.compile(rf'(?i)(?<!\w){re.escape(kw.lower())}(?!\w)')
+        elif has_special_chars:
+            # Escape all parts and allow optional whitespace around symbols
+            flexible = re.sub(r'([./+\-#])', r'\s*\1\s*', re.escape(kw))
+            pattern = re.compile(rf'(?i)(?<!\w){flexible}(?!\w)')
+        else:
+            pattern = re.compile(re.escape(kw), re.IGNORECASE)
+
+        normalized.append({
             'original': kw,
-            'lower': kw.lower(),
-            'is_acronym': kw.isupper() and len(kw) <= 5,  # IT, API, UI/UX, etc.
-            'is_short': len(kw) <= 3,  # Short words like "IT", "AI"
-            'has_special_chars': bool(re.search(r'[./\-+#]', kw))  # C++, .NET, UI/UX
-        }
-        normalized.append(keyword_info)
+            'regex': pattern
+        })
 
     return normalized
 
-
 def is_keyword_match(text: str, keyword_info: Dict) -> bool:
-    """Smart keyword matching based on keyword type"""
-    original = keyword_info['original']
-    lower_kw = keyword_info['lower']
-
-    # For acronyms and short words, use word boundary matching
-    if keyword_info['is_acronym'] or keyword_info['is_short']:
-        # Match as whole word, case-sensitive for acronyms
-        if keyword_info['is_acronym']:
-            # Case-sensitive for acronyms like "IT", "AI", "ML"
-            pattern = r'\b' + re.escape(original) + r'\b'
-            return bool(re.search(pattern, text))
-        else:
-            # Case-insensitive for short words but still whole word
-            pattern = r'\b' + re.escape(lower_kw) + r'\b'
-            return bool(re.search(pattern, text.lower()))
-
-    # For words with special characters (C++, .NET, UI/UX)
-    elif keyword_info['has_special_chars']:
-        # More flexible matching for technical terms
-        escaped = re.escape(original)
-        pattern = r'\b' + escaped + r'\b'
-        return bool(re.search(pattern, text, re.IGNORECASE))
-
-    # For regular longer words, use simple case-insensitive substring
-    else:
-        return lower_kw in text.lower()
-
+    return bool(keyword_info['regex'].search(text))
 
 def find_matched_keywords(text: str, normalized_keywords: List[Dict]) -> List[str]:
     """Find all keywords that match in the text"""
@@ -123,7 +107,9 @@ def test_keyword_matching():
         "AI engineer remote position",
         "Remote work available",
         "This is a great opportunity",  # Should not match "IT" in "opportunity"
-        "Digital marketing position"  # Should not match "IT" in "Digital"
+        "Digital marketing position",  # Should not match "IT" in "Digital"
+        "C ++ developer needed",  # Should match C++
+        "DotNet and .NET experience",  # Should match .NET
     ]
 
     print("🧪 Testing keyword matching:")
