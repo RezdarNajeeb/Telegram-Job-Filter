@@ -1,0 +1,17 @@
+channels:
+  - channel_username_1  # Replace with your channel username
+  - channel_username_2  # Replace with your channel username
+  - channel_username_3  # Replace with your channel username
+  - ...                # Add more channels as needed
+
+keywords:
+  - keyword_1  # Replace with your keyword
+  - keyword_2  # Replace with your keyword
+  - keyword_3  # Replace with your keyword
+  - ...          # Add more keywords as needed
+
+forward_to: saved_messages   # OR your_channel_username OR group_name
+message_limit: 50 # Maximum number of messages to process per channel
+
+save_to_file: true # Save messages to a file
+log_to_google_sheets: false # Log messages to Google Sheets (requires additional setup)
