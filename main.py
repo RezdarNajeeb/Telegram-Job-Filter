@@ -3,8 +3,8 @@ from job_filter import fetch_and_filter_messages
 from forwarder import forward_messages
 from utils import load_config, save_to_file
 from sheets import log_to_sheet
-from report_generator import save_html_report  # New import
-from stats_tracker import JobStats  # New import
+from report_generator import save_html_report
+from stats_tracker import JobStats
 
 import asyncio
 
@@ -12,7 +12,7 @@ import asyncio
 async def main():
     config = load_config()
     client = get_client()
-    stats = JobStats()  # Initialize stats tracker
+    stats = JobStats() # by default stats are not saved to file
 
     async with client:
         print("🔍 Searching for jobs...")

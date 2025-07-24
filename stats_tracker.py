@@ -12,13 +12,14 @@ from utils import load_config, save_to_file
 
 
 class JobStats:
-    def __init__(self, stats_file="job_stats.json"):
+    def __init__(self, stats_file="job_stats.json", save_to_file=False):
         self.stats_file = stats_file
+        self.save_to_file = save_to_file
         self.stats = self.load_stats()
 
     def load_stats(self):
         """Load existing stats or create new ones"""
-        if os.path.exists(self.stats_file):
+        if self.save_to_file and os.path.exists(self.stats_file):
             with open(self.stats_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         return {
@@ -63,7 +64,8 @@ class JobStats:
             if msg.get('has_contact'):
                 self.stats["jobs_with_contact"] += 1
 
-        self.save_stats()
+        if self.save_to_file:
+            self.save_stats()
 
     def save_stats(self):
         """Save stats to file"""
