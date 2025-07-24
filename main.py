@@ -1,15 +1,13 @@
 import asyncio
-import json
 import os
 import re
 from datetime import datetime
 from io import BytesIO
 from typing import Dict, List
 
-from telethon import TelegramClient, events, Button
-from telethon.sessions import StringSession
-from telethon.errors import SessionPasswordNeededError
 from dotenv import load_dotenv
+from telethon import TelegramClient, events, Button
+from telethon.errors import SessionPasswordNeededError
 
 # Import your existing modules here (implement or adjust as needed)
 from job_filter import fetch_and_filter_messages
@@ -17,7 +15,6 @@ from report_generator import generate_html_report
 from stats_tracker import JobStats
 
 load_dotenv()
-
 
 class JobFilterBot:
     def __init__(self):
@@ -33,7 +30,7 @@ class JobFilterBot:
         )
 
         # Bot client to interact with users
-        self.bot_client = TelegramClient("bot_session", self.api_id, self.api_hash).start(bot_token=self.bot_token)
+        self.bot_client = TelegramClient("bot_session", self.api_id, self.api_hash)
 
         # Per user configs and stats
         self.user_configs: Dict[int, Dict] = {}
@@ -56,7 +53,7 @@ class JobFilterBot:
         print("✅ User client authorized and started.")
 
         # Start bot client
-        await self.bot_client.start()
+        await self.bot_client.start(bot_token=self.bot_token)
         me = await self.bot_client.get_me()
         print(f"🤖 Bot started as @{me.username}")
 
