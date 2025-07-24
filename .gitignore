@@ -2,3 +2,4 @@
 .env
 credentials.json
 config.yaml
+session.session
